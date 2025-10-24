@@ -21,14 +21,16 @@ coord update_position(coord p, uint c);
 //Main
 int main(){
     //std::cout<<"Noch ist nichts relevantes implementiert\n";
-    uint c{0};
-    uint times_to_run{10000};
-    uint times_run{0};
-    uint died{0};
-    uint steps_per_run{25};
+    unsigned int c{0};
+    unsigned int times_to_run{1000};
+    unsigned int times_run{0};
+    unsigned int died{0};
+    unsigned int steps_per_run{100};
+    
     
     int max_x = 5;//pm 5: Soll ein 10x10 Feld sein
     int max_y = 5;
+    srand(time(0));
     coord p_start{
         0,
         0
@@ -50,19 +52,16 @@ int main(){
         -2,
         3
     };
-    std::vector<coord> mines(4,p);
-    mines.push_back(mine_0);
-    mines.push_back(mine_1);
-    mines.push_back(mine_2);
-    mines.push_back(mine_3);
+std::vector<coord> mines = {mine_0, mine_1, mine_2, mine_3};
     //Die eigentliche Simulation:
     while(times_run <times_to_run){
-        uint steps_taken{0};
+        unsigned int steps_taken{0};
         p = p_start;
         //25 Schritte pro versuch
         while(steps_taken < steps_per_run){
-            print_coord(p);
-            std::cout<<"Times run:"<<times_run<<",steps taken:"<<steps_taken<<"\n";
+            if (times_run % 100 == 0 && steps_taken == 0){
+                std::cout << "Run " << times_run << " started.\n";
+            }
             c=determine_class(p, max_x, max_y);
             p = update_position(p, c);
             if(same_position(mines[0], p)||same_position(mines[1], p)||same_position(mines[2], p)||same_position(mines[3], p)){
@@ -73,10 +72,9 @@ int main(){
         }
         times_run++;
     }
-    float death_rate = (float) died/times_run;
-    std::cout<<"The walker died "<< died <<"-times.\n";
-    std::cout<<"Which means we have an survival posibility of "<< 100*(1-death_rate) <<"%.\n";
-
+    float death_rate = static_cast<float>(died) / times_to_run;
+    std::cout << "The walker died " << died << " times.\n";
+    std::cout << "Survival probability: " << 100 * (1 - death_rate) << "%\n";
     return 0;
 }
 
@@ -104,7 +102,7 @@ void print_coord(coord p1){
 
 /*Idee abhänig von der Aktuellen position des Walkers wird seine aktuelle Klasse ermittelt:
 */
-uint determine_class(coord p1,int max_x,int max_y){
+unsigned int determine_class(coord p1,int max_x,int max_y){
     if(p1.x_pos < max_x && p1.x_pos > -max_x && p1.y_pos < max_y && p1.y_pos > -max_y ){
         return 0;}//Walker ist an keinem Rand
     else if( p1.y_pos == -max_y ){//Wir sind am unteren rand
@@ -142,17 +140,12 @@ uint determine_class(coord p1,int max_x,int max_y){
     }
 }
 //Der eigentliche Rnd-Walk
-coord update_position(coord p, uint c){
-    int rnd_x = rand() %2;
-    int rnd_y = rand() %2;
-    int rnd_positive_x = rand() %2;//if rnd_positive_x =1 dann sind wir 1 in positive x-Richtung gelaufen.
-    rnd_positive_x = (rnd_positive_x ==1) ? 1 : -1;
-    int rnd_positive_y = rand() %2;
-    rnd_positive_y = (rnd_positive_y ==1) ? 1 : -1;
-    coord move{
-        rnd_x*rnd_positive_x,
-        rnd_y*rnd_positive_y
-    };
+coord update_position(coord p, unsigned int c){
+    coord move;
+    do {
+        move.x_pos = (rand() % 3) - 1; // -1, 0, 1
+        move.y_pos = (rand() % 3) - 1; // -1, 0, 1
+    } while (move.x_pos == 0 && move.y_pos == 0);
     switch (c){
         case 0:
         break;                  //negativ positiv
